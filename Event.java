@@ -3,16 +3,29 @@ import java.time.LocalTime;
 
 public class Event {
 
+    final int DEFAULT_PRIORITY = 1;
+
     private String title;
     private String description;
+    private int priority;
     private LocalDate date;
     private LocalTime time;
 
-    public Event(String title, String descr, LocalDate day, LocalTime time) {
+    // Constructor
+    public Event(String title, String description, LocalDate date, LocalTime time) {
         this.title = title;
-        this.description = descr;
-        this.date = day;
+        this.description = description;
+        this.date = date;
         this.time = time;
+        this.priority = this.DEFAULT_PRIORITY;
+    }
+    // Overloaded method that includes priority
+    public Event(String title, String description, LocalDate date, LocalTime time, int priority) {
+        this.title = title;
+        this.description = description;
+        this.date = date;
+        this.time = time;
+        this.priority = priority;
     }
 
     // Getters
@@ -31,13 +44,16 @@ public class Event {
     public LocalTime getTime() {
         return time;
     }
+    public int getPriority() {
+        return priority;
+    }
 
     // Setters
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public void getDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -49,11 +65,16 @@ public class Event {
         this.time = time;
     }
 
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+
     @Override
     public String toString() {
         return "Event: " + getTitle()
-        + "\nDescription: " + getDescription()
-        + "\nDate: " + getDate()
-        + "\nTime: " + getTime();
+                + "\nDescription: " + getDescription()
+                + "\nDate: " + getDate()
+                + "\nTime: " + getTime();
     }
 }

@@ -5,8 +5,9 @@ import java.util.Objects;
 public class HashTable<T> {
     // Load factor threshold for dynamic resizing
     private static final double LOAD_FACTOR_THRESHOLD = 0.7;
+    static final int Default_SIZE  = 7;
     private int size;
-    private List<Entry<T>> table;
+    private List<Entry<T, Integer>> table;
 
     // Constructor
     public HashTable(int size) {
@@ -28,6 +29,14 @@ public class HashTable<T> {
         }
     }
 
+    public HashTable() {
+        this.size =  Default_SIZE;
+        // Initialize size and create a list for the table
+        this.table = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            table.add(null);
+        }
+    }
     // Primary hash function
     private int primaryHash(int key) {
         return key % this.size;
@@ -77,7 +86,7 @@ public class HashTable<T> {
     }
 
     // Retrieve method to get an entry given a key
-    public Entry<T> retrieve(int key) {
+    public Entry<T, Integer> retrieve(int key) {
         int i = 0;
         int index = doubleHash(key, i);
 
@@ -92,6 +101,23 @@ public class HashTable<T> {
 
         return null; // Return null if the entry is not found
     }
+
+    public T retrieveVal(int key) {
+        int i = 0;
+        int index = doubleHash(key, i);
+
+        // Search for the entry using double hashing
+        while (table.get(index) != null) {
+            if (Objects.equals(table.get(index).getKey(), key)) {
+                return table.get(index).value;
+            }
+            i++;
+            index = doubleHash(key, i);
+        }
+
+        return null; // Return null if the entry is not found
+    }
+
 
     // Delete method to remove an entry based on the key
     public boolean delete(int key) {
@@ -145,7 +171,7 @@ public class HashTable<T> {
         }
 
         // Save the old table and create a new one
-        List<Entry<T>> oldTable = new ArrayList<>(table);
+        List<Entry<T, Integer>> oldTable = new ArrayList<>(table);
         this.size = newSize;
         this.table = new ArrayList<>(size);
 
@@ -155,7 +181,7 @@ public class HashTable<T> {
         }
 
         // Reinsert all items from the old table
-        for (Entry<T> entry : oldTable) {
+        for (Entry<T, Integer> entry : oldTable) {
             if (entry != null) {
                 int i = 0;
                 int index = doubleHash(entry.getKey(), i);
@@ -183,7 +209,7 @@ public class HashTable<T> {
     }
 
     // Getter for the table
-    public List<Entry<T>> getTable() {
+    public List<Entry<T, Integer>> getTable() {
         return table;
     }
 
@@ -191,7 +217,7 @@ public class HashTable<T> {
     public void displayTable() {
         System.out.println("\n--- Hash Table Content ---");
         for (int i = 0; i < size; i++) {
-            Entry<T> entry = table.get(i);
+            Entry<T, Integer> entry = table.get(i);
             if (entry != null) {
                 System.out.println("\nIndex " + i + "\n" + entry.getKey() + ": " +
                         entry.getValue() + "\n-----------------------");
