@@ -1,14 +1,19 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Scanner;
+import java.util.Comparator;
 
 public class Calendar {
     private final HashTable<HashTable<HashTable<List<Event>>>> calendar;
+    private PriorityQueue<Event> eventReminders;
 
     public Calendar() {
         this.calendar = new HashTable<>();
+        this.eventReminders = new PriorityQueue<>(Comparator.comparing(Event::getDateTime));
     }
 
     public void createEvent(String title, String description, LocalDate date, LocalTime time) {
@@ -69,6 +74,10 @@ public class Calendar {
                 }
             }
         }
+
+        // Add to the Reminders Priority Queue
+        eventReminders.offer(newEvent);
+
         System.out.println("Event created: " + newEvent +"\n");
     }
 
@@ -94,6 +103,84 @@ public class Calendar {
         return -1; // No conflict
     }
 
+    public void displayDailyView(LocalDate date) {
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int day = date.getDayOfMonth();
 
+        // Retrieve events for the specifies day
+        List<Event> dayEvents = retrieveEvents(year, month, day);
+
+        if (dayEvents != null && !dayEvents.isEmpty()) {
+            System.out.println(date + " Events: ");
+            for (Event e : dayEvents) {
+                System.out.println(e);
+            }
+        }
+        else {
+            System.out.println(date + " has no events.");
+        }
+    }
+
+    public void displayMonthlyView(int year, int month) {
+        HashTable<HashTable<List<Event>>> yearLevel = calendar.retrieveVal(year);
+
+        if (yearLevel != null) {
+            HashTable<List<Event>> monthLevel = yearLevel.retrieveVal(month);
+
+            if (monthLevel != null) {
+                System.out.println("\n=== Monthly View ===");
+                System.out.println("Year: " + year + ", Month: " + month);
+
+                // Iterate through each day in the month using a hash table
+                for (int day = 1; day <= 31; day++) {
+                    List<Event> dayEvents = monthLevel.retrieveVal(day);
+
+                    if (dayEvents != null && !dayEvents.isEmpty()) {
+                        System.out.println("\n" + LocalDate.of(year, month, day) + " Events: ");
+                        for (Event e : dayEvents) {
+                            System.out.println(e);
+                        }
+                    }
+                }
+
+                return;
+            }
+        }
+
+        System.out.println("No events found for the specified month and year.");
+    }
+
+    private List<Event> retrieveEvents(int year, int month, int day) {
+        HashTable<HashTable<List<Event>>> yearLevel = calendar.retrieveVal(year);
+
+        if (yearLevel != null) {
+            HashTable<List<Event>> monthLevel = yearLevel.retrieveVal(month);
+
+            if (monthLevel != null) {
+                return monthLevel.retrieveVal(day);
+            }
+        }
+
+        return null;
+    }
+
+    public void displayEventReminders() {
+        LocalTime currentTime = LocalTime.now();
+
+        // Check if there are upcoming events
+        while (!eventReminders.isEmpty()) {
+            Event upcomingEvent = eventReminders.peek();
+
+            if (currentTime.isBefore(upcomingEvent.getTime())) {
+                System.out.println("Next Upcoming Event...");
+                System.out.println(upcomingEvent);
+                break; // Exit the loop after displaying the first upcoming event
+            }
+
+            // Remove the event from the priority queue as it has already occurred
+            eventReminders.poll();
+        }
+    }
 
 }

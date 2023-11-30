@@ -1,9 +1,8 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Event {
-
-    final int DEFAULT_PRIORITY = 1;
 
     private String title;
     private String description;
@@ -17,15 +16,6 @@ public class Event {
         this.description = description;
         this.date = date;
         this.time = time;
-        this.priority = this.DEFAULT_PRIORITY;
-    }
-    // Overloaded method that includes priority
-    public Event(String title, String description, LocalDate date, LocalTime time, int priority) {
-        this.title = title;
-        this.description = description;
-        this.date = date;
-        this.time = time;
-        this.priority = priority;
     }
 
     // Getters
@@ -44,8 +34,9 @@ public class Event {
     public LocalTime getTime() {
         return time;
     }
-    public int getPriority() {
-        return priority;
+
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.parse(getDate() + "T" + getTime());
     }
 
     // Setters
@@ -63,10 +54,6 @@ public class Event {
 
     public void setTime(LocalTime time) {
         this.time = time;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
     }
 
 
