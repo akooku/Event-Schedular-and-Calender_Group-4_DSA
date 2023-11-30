@@ -129,7 +129,6 @@ public class Calendar {
             HashTable<List<Event>> monthLevel = yearLevel.retrieveVal(month);
 
             if (monthLevel != null) {
-                System.out.println("\n=== Monthly View ===");
                 System.out.println("Year: " + year + ", Month: " + month);
 
                 // Iterate through each day in the month using a hash table
@@ -182,5 +181,7 @@ public class Calendar {
             eventReminders.poll();
         }
     }
+
+    public void modifyEvent() {}
 
 }
