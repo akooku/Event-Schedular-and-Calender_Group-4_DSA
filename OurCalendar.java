@@ -1,17 +1,14 @@
+import jdk.internal.event.Event;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Scanner;
-import java.util.Comparator;
+import java.util.*;
 
-public class Calendar {
-    private final HashTable<HashTable<HashTable<List<Event>>>> calendar;
-    private PriorityQueue<Event> eventReminders;
+public class OurCalendar {
+    public HashTable<HashTable<HashTable<List<Event>>>> calendar;
+    public PriorityQueue<Event> eventReminders;
 
-    public Calendar() {
+    public OurCalendar() {
         this.calendar = new HashTable<>();
         this.eventReminders = new PriorityQueue<>(Comparator.comparing(Event::getDateTime));
     }
@@ -103,11 +100,7 @@ public class Calendar {
         return -1; // No conflict
     }
 
-    public void displayDailyView(LocalDate date) {
-        int year = date.getYear();
-        int month = date.getMonthValue();
-        int day = date.getDayOfMonth();
-
+    public void displayDailyView(int year, int month, int day) {
         // Retrieve events for the specifies day
         List<Event> dayEvents = retrieveEvents(year, month, day);
 
@@ -150,7 +143,7 @@ public class Calendar {
         System.out.println("No events found for the specified month and year.");
     }
 
-    private List<Event> retrieveEvents(int year, int month, int day) {
+    public List<Event> retrieveEvents(int year, int month, int day) {
         HashTable<HashTable<List<Event>>> yearLevel = calendar.retrieveVal(year);
 
         if (yearLevel != null) {
@@ -160,8 +153,15 @@ public class Calendar {
                 return monthLevel.retrieveVal(day);
             }
         }
-
         return null;
+    }
+
+    public Event retrieveEvent(Event event) {
+        List<Event> events =retrieveEvents(event.getDate().getYear(),
+                event.getDate().getMonthValue(),
+                event.getDate().getDayOfMonth());
+
+        return binarySearchConflict(events, event.getTime())
     }
 
     public void displayEventReminders() {
@@ -182,6 +182,16 @@ public class Calendar {
         }
     }
 
-    public void modifyEvent() {}
+    public void deleteEvent(Event target){
+        List<Event> events  =  retrieveEvents(target.getDate().getYear(),
+                target.getDate().getMonthValue(),
+                target.getDate().getDayOfMonth() );
+        int index = binarySearchConflict(events,
+                target.getTime());
+        if (index>0) {
+            events.remove(index)
+        }
+
+    }
 
 }
