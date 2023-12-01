@@ -6,7 +6,6 @@ public class Event {
 
     private String title;
     private String description;
-    private int priority;
     private LocalDate date;
     private LocalTime time;
 

@@ -1,16 +1,12 @@
-import jdk.internal.event.Event;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
 public class OurCalendar {
     public HashTable<HashTable<HashTable<List<Event>>>> calendar;
-    public PriorityQueue<Event> eventReminders;
 
     public OurCalendar() {
         this.calendar = new HashTable<>();
-        this.eventReminders = new PriorityQueue<>(Comparator.comparing(Event::getDateTime));
     }
 
     public void createEvent(String title, String description, LocalDate date, LocalTime time) {
@@ -19,7 +15,7 @@ public class OurCalendar {
         int day = date.getDayOfMonth();
 
         // Ensure the year level exists
-       HashTable<HashTable<List<Event>>> yearLevel = calendar.retrieveVal(year);
+        HashTable<HashTable<List<Event>>> yearLevel = calendar.retrieveVal(year);
 
         if (yearLevel == null) {
             yearLevel = new HashTable<>();
@@ -71,14 +67,10 @@ public class OurCalendar {
                 }
             }
         }
-
-        // Add to the Reminders Priority Queue
-        eventReminders.offer(newEvent);
-
         System.out.println("Event created: " + newEvent +"\n");
     }
 
-    private int binarySearchConflict(List<Event> events, LocalTime newEventTime) {
+    public int binarySearchConflict(List<Event> events, LocalTime newEventTime) {
         int low = 0;
         int high = events.size() - 1;
 
@@ -96,22 +88,22 @@ public class OurCalendar {
                 high = mid - 1;
             }
         }
-
         return -1; // No conflict
     }
 
-    public void displayDailyView(int year, int month, int day) {
+    public void displayDailyView(Event target) {
+
         // Retrieve events for the specifies day
-        List<Event> dayEvents = retrieveEvents(year, month, day);
+        List<Event> dayEvents = retrieveEvents(target);
 
         if (dayEvents != null && !dayEvents.isEmpty()) {
-            System.out.println(date + " Events: ");
+            System.out.println(target.getDate() + " Events: ");
             for (Event e : dayEvents) {
                 System.out.println(e);
             }
         }
         else {
-            System.out.println(date + " has no events.");
+            System.out.println(target.getDate() + " has no events.");
         }
     }
 
@@ -135,15 +127,16 @@ public class OurCalendar {
                         }
                     }
                 }
-
                 return;
             }
         }
-
         System.out.println("No events found for the specified month and year.");
     }
 
-    public List<Event> retrieveEvents(int year, int month, int day) {
+    public List<Event> retrieveEvents(Event target) {
+        int year = target.getDate().getYear();
+        int month = target.getDate().getMonthValue();
+        int day = target.getDate().getDayOfMonth();
         HashTable<HashTable<List<Event>>> yearLevel = calendar.retrieveVal(year);
 
         if (yearLevel != null) {
@@ -153,45 +146,48 @@ public class OurCalendar {
                 return monthLevel.retrieveVal(day);
             }
         }
-        return null;
+        return null;     
     }
 
-    public Event retrieveEvent(Event event) {
-        List<Event> events =retrieveEvents(event.getDate().getYear(),
-                event.getDate().getMonthValue(),
-                event.getDate().getDayOfMonth());
-
-        return binarySearchConflict(events, event.getTime())
+    public Event retrieveEvent(Event target) {
+        List<Event> events = retrieveEvents(target);
+        int index = binarySearchConflict(events, target.getTime());
+        return events.get(index);
     }
 
     public void displayEventReminders() {
+        LocalDate currentDate = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
 
-        // Check if there are upcoming events
-        while (!eventReminders.isEmpty()) {
-            Event upcomingEvent = eventReminders.peek();
+        boolean found = false;
 
+        Event dummy =  new Event(null, null, currentDate, currentTime);
+
+        List<Event> dayEvents = retrieveEvents(dummy); 
+
+        for (Event upcomingEvent : dayEvents) {
             if (currentTime.isBefore(upcomingEvent.getTime())) {
                 System.out.println("Next Upcoming Event...");
                 System.out.println(upcomingEvent);
+                found = true;
                 break; // Exit the loop after displaying the first upcoming event
             }
-
-            // Remove the event from the priority queue as it has already occurred
-            eventReminders.poll();
         }
+
+        if (!found) {
+            System.out.println("No upcoming event found.");
+        }
+
+        
     }
 
     public void deleteEvent(Event target){
-        List<Event> events  =  retrieveEvents(target.getDate().getYear(),
-                target.getDate().getMonthValue(),
-                target.getDate().getDayOfMonth() );
+        List<Event> events  =  retrieveEvents(target);
+
         int index = binarySearchConflict(events,
                 target.getTime());
         if (index>0) {
-            events.remove(index)
+            events.remove(index);
         }
-
     }
-
 }
